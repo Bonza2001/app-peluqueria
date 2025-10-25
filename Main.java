@@ -1,168 +1,218 @@
 import javax.swing.*;
+import javax.swing.border.*;
 import java.awt.*;
+import java.awt.event.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 
-/**
- * Guarda este archivo como Main.java
- * Compilar: javac Main.java
- * Ejecutar:  java Main
- *
- * Usuario: admin
- * Contraseña: 1234
- */
-public class Main {
+class Usuario {
+    String nombre;
+    String telefono;
+    String tipoCliente;
+    String corteSeleccionado;
+    LocalDateTime fechaEntrada;
+    LocalDateTime fechaSalida;
+
+    Usuario(String nombre, String telefono) {
+        this.nombre = nombre;
+        this.telefono = telefono;
+        this.fechaEntrada = LocalDateTime.now();
+        this.fechaSalida = null;
+        this.corteSeleccionado = "";
+    }
+
+    void salir() {
+        this.fechaSalida = LocalDateTime.now();
+    }
+
+    @Override
+    public String toString() {
+        String salida = (fechaSalida == null) ? "En barbería" : fechaSalida.format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+        return nombre + " | " + telefono + " | " + tipoCliente + " | Corte: " + corteSeleccionado + " | Entrada: "
+                + fechaEntrada.format(DateTimeFormatter.ofPattern("HH:mm:ss")) + " | Salida: " + salida;
+    }
+}
+
+class BarberiaExotica {
+    private ArrayList<Usuario> usuarios = new ArrayList<>();
+    private Usuario usuarioActual;
+    private JTextArea mensajesArea;
+
+    public BarberiaExotica() {
+        mostrarVentanaInicio();
+    }
+
+    private void mostrarVentanaInicio() {
+        JFrame frame = new JFrame("Barbería Exótica");
+        frame.setSize(700, 500);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setLayout(new BorderLayout());
+        frame.getContentPane().setBackground(new Color(245, 222, 179));
+
+        JLabel lblBienvenida = new JLabel("<html><center>Bienvenidos a nuestra Barbería Exótica,<br>Dios los bendiga</center></html>", SwingConstants.CENTER);
+        lblBienvenida.setFont(new Font("Monotype Corsiva", Font.BOLD, 22));
+        lblBienvenida.setForeground(new Color(139, 69, 19));
+        lblBienvenida.setBorder(new EmptyBorder(20,10,20,10));
+        frame.add(lblBienvenida, BorderLayout.NORTH);
+
+        JPanel panel = new JPanel(new GridLayout(4,2,10,10));
+        panel.setBackground(new Color(245, 222, 179));
+        panel.setBorder(new EmptyBorder(50,100,50,100));
+
+        JLabel lblNombre = new JLabel("Nombre:");
+        JTextField txtNombre = new JTextField();
+
+        JLabel lblTelefono = new JLabel("Teléfono:");
+        JTextField txtTelefono = new JTextField();
+
+        JButton btnIniciar = new JButton("Iniciar Sesión");
+        JButton btnMensajes = new JButton("Buzón de Mensajes");
+
+        panel.add(lblNombre); panel.add(txtNombre);
+        panel.add(lblTelefono); panel.add(txtTelefono);
+        panel.add(btnIniciar); panel.add(btnMensajes);
+
+        frame.add(panel, BorderLayout.CENTER);
+
+        mensajesArea = new JTextArea();
+        mensajesArea.setEditable(false);
+        mensajesArea.setBackground(new Color(255, 228, 196));
+        JScrollPane scrollMensajes = new JScrollPane(mensajesArea);
+        scrollMensajes.setBorder(BorderFactory.createTitledBorder("Buzón de Mensajes"));
+        frame.add(scrollMensajes, BorderLayout.SOUTH);
+
+        btnIniciar.addActionListener(e -> {
+            String nombre = txtNombre.getText().trim();
+            String telefono = txtTelefono.getText().trim();
+            if(!nombre.isEmpty() && !telefono.isEmpty()) {
+                usuarioActual = new Usuario(nombre, telefono);
+                usuarios.add(usuarioActual);
+                mensajesArea.append("Usuario ingresó: " + nombre + "\n");
+                frame.dispose();
+                mostrarMenuCortes();
+            } else {
+                JOptionPane.showMessageDialog(frame, "Ingrese nombre y teléfono.");
+            }
+        });
+
+        btnMensajes.addActionListener(e -> JOptionPane.showMessageDialog(frame, mensajesArea.getText(), "Mensajes del propietario", JOptionPane.INFORMATION_MESSAGE));
+
+        frame.setVisible(true);
+    }
+
+    private void mostrarMenuCortes() {
+        JFrame frame = new JFrame("Menú de Cortes");
+        frame.setSize(750, 550);
+        frame.setLayout(new BorderLayout());
+        frame.getContentPane().setBackground(new Color(224, 255, 255));
+
+        JLabel lblTitulo = new JLabel("Seleccione su tipo de cliente y corte", SwingConstants.CENTER);
+        lblTitulo.setFont(new Font("Comic Sans MS", Font.BOLD, 20));
+        lblTitulo.setForeground(new Color(0, 128, 128));
+        lblTitulo.setBorder(new EmptyBorder(20,10,20,10));
+        frame.add(lblTitulo, BorderLayout.NORTH);
+
+        JPanel panelMenu = new JPanel(new GridLayout(3,2,10,10));
+        panelMenu.setBorder(new EmptyBorder(20,50,20,50));
+        panelMenu.setBackground(new Color(224, 255, 255));
+
+        JButton btnHombres = new JButton("Hombres");
+        JButton btnMujeres = new JButton("Mujeres");
+        JButton btnAdultos = new JButton("Adultos");
+        JButton btnJovenes = new JButton("Jóvenes");
+        JButton btnNinos = new JButton("Niños");
+        JButton btnProductos = new JButton("Productos");
+
+        panelMenu.add(btnHombres); panelMenu.add(btnMujeres);
+        panelMenu.add(btnAdultos); panelMenu.add(btnJovenes);
+        panelMenu.add(btnNinos); panelMenu.add(btnProductos);
+
+        frame.add(panelMenu, BorderLayout.CENTER);
 
 
-    static DefaultListModel<String> historial = new DefaultListModel<>();
+        JTextArea historialArea = new JTextArea();
+        historialArea.setEditable(false);
+        historialArea.setBackground(new Color(255, 240, 245));
+        JScrollPane scrollHistorial = new JScrollPane(historialArea);
+        scrollHistorial.setBorder(BorderFactory.createTitledBorder("Historial de Usuarios"));
+
+        frame.add(scrollHistorial, BorderLayout.SOUTH);
+
+        
+        btnHombres.addActionListener(e -> seleccionarCorte("Hombres", historialArea));
+        btnMujeres.addActionListener(e -> seleccionarCorte("Mujeres", historialArea));
+        btnAdultos.addActionListener(e -> seleccionarCorte("Adultos", historialArea));
+        btnJovenes.addActionListener(e -> seleccionarCorte("Jóvenes", historialArea));
+        btnNinos.addActionListener(e -> seleccionarCorte("Niños", historialArea));
+        btnProductos.addActionListener(e -> mostrarProductos());
+
+        actualizarHistorial(historialArea);
+
+        frame.setVisible(true);
+    }
+
+    private void seleccionarCorte(String tipoCliente, JTextArea historialArea) {
+        String[] cortes;
+        double[] precios;
+
+        switch(tipoCliente) {
+            case "Hombres":
+                cortes = new String[]{"Corte Moderno", "Corte Clásico", "Barba"};
+                precios = new double[]{20, 15, 10};
+                break;
+            case "Mujeres":
+                cortes = new String[]{"Corte Moderno", "Corte Clásico", "Peinado"};
+                precios = new double[]{25, 20, 15};
+                break;
+            case "Adultos":
+            case "Jóvenes":
+                cortes = new String[]{"Corte Moderno", "Corte Clásico"};
+                precios = new double[]{20, 15};
+                break;
+            case "Niños":
+                cortes = new String[]{"Corte Moderno", "Corte Clásico"};
+                precios = new double[]{10, 8};
+                break;
+            default:
+                cortes = new String[]{};
+                precios = new double[]{};
+        }
+
+        StringBuilder opciones = new StringBuilder();
+        for(int i=0;i<cortes.length;i++) {
+            opciones.append(cortes[i]).append(" ($").append(precios[i]).append(")\n");
+        }
+
+        String corte = (String) JOptionPane.showInputDialog(null, "Seleccione corte para " + tipoCliente + ":\n" + opciones,
+                "Cortes", JOptionPane.QUESTION_MESSAGE, null, cortes, cortes[0]);
+
+        if(corte != null) {
+            usuarioActual.tipoCliente = tipoCliente;
+            usuarioActual.corteSeleccionado = corte;
+            mensajesArea.append("Usuario " + usuarioActual.nombre + " seleccionó: " + corte + "\n");
+            actualizarHistorial(historialArea);
+        }
+    }
+
+    private void mostrarProductos() {
+        String[] productos = {"Shampoo $5", "Perfume $10", "Crema de Peinar $7"};
+        String producto = (String) JOptionPane.showInputDialog(null, "Seleccione producto a comprar",
+                "Productos", JOptionPane.QUESTION_MESSAGE, null, productos, productos[0]);
+        if(producto != null) {
+            mensajesArea.append("Usuario " + usuarioActual.nombre + " compró: " + producto + "\n");
+        }
+    }
+
+    private void actualizarHistorial(JTextArea historialArea) {
+        historialArea.setText("");
+        for(Usuario u : usuarios) {
+            historialArea.append(u.toString() + "\n");
+        }
+        historialArea.append("\n¡Gracias por su atención! Saludos cordiales.\n");
+    }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new LoginVentana());
-    }
-
-
-    static class LoginVentana extends JFrame {
-        JTextField usuarioField;
-        JPasswordField passField;
-
-        public LoginVentana() {
-            setTitle("Peluquería Unisex - Inicio de Sesión");
-            setSize(360, 200);
-            setDefaultCloseOperation(EXIT_ON_CLOSE);
-            setLocationRelativeTo(null);
-
-            JPanel panel = new JPanel(new GridLayout(3, 2, 5, 5));
-
-            panel.add(new JLabel("Usuario:"));
-            usuarioField = new JTextField();
-            panel.add(usuarioField);
-
-            panel.add(new JLabel("Contraseña:"));
-            passField = new JPasswordField();
-            panel.add(passField);
-
-            panel.add(new JLabel("")); // espacio
-            JButton loginBtn = new JButton("Ingresar");
-            panel.add(loginBtn);
-
-            loginBtn.addActionListener(e -> {
-                String usuario = usuarioField.getText().trim();
-                String pass = new String(passField.getPassword());
-                if (usuario.equals("admin") && pass.equals("1234")) {
-                    dispose();
-                    new MenuPrincipal(usuario);
-                } else {
-                    JOptionPane.showMessageDialog(this, "Usuario o contraseña incorrectos");
-                }
-            });
-
-            add(panel);
-            setVisible(true);
-        }
-    }
-
-
-    static class MenuPrincipal extends JFrame {
-        public MenuPrincipal(String usuario) {
-            setTitle("Menú Principal - Bienvenido " + usuario);
-            setSize(400, 300);
-            setDefaultCloseOperation(EXIT_ON_CLOSE);
-            setLocationRelativeTo(null);
-
-            JPanel panel = new JPanel(new GridLayout(3, 1, 10, 10));
-
-            JButton serviciosBtn = new JButton("Servicios");
-            JButton productosBtn = new JButton("Productos");
-            JButton historialBtn = new JButton("Historial");
-
-            panel.add(serviciosBtn);
-            panel.add(productosBtn);
-            panel.add(historialBtn);
-
-            serviciosBtn.addActionListener(e -> new ServiciosVentana());
-            productosBtn.addActionListener(e -> new ProductosVentana());
-            historialBtn.addActionListener(e -> new HistorialVentana());
-
-            add(panel);
-            setVisible(true);
-        }
-    }
-
-
-    static class ServiciosVentana extends JFrame {
-        public ServiciosVentana() {
-            setTitle("Servicios de Peluquería");
-            setSize(320, 280);
-            setLocationRelativeTo(null);
-
-            String[] servicios = {"Corte Caballero", "Corte Dama", "Tintura", "Peinado", "Barba"};
-            JList<String> lista = new JList<>(servicios);
-            lista.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-
-            JButton agregarBtn = new JButton("Agregar al historial");
-            agregarBtn.addActionListener(e -> {
-                String seleccion = lista.getSelectedValue();
-                if (seleccion != null) {
-                    historial.addElement("Servicio: " + seleccion);
-                    JOptionPane.showMessageDialog(this, seleccion + " agregado al historial");
-                } else {
-                    JOptionPane.showMessageDialog(this, "Selecciona un servicio primero");
-                }
-            });
-
-            add(new JScrollPane(lista), BorderLayout.CENTER);
-            add(agregarBtn, BorderLayout.SOUTH);
-            setVisible(true);
-        }
-    }
-
-
-    static class ProductosVentana extends JFrame {
-        public ProductosVentana() {
-            setTitle("Productos a la Venta");
-            setSize(320, 280);
-            setLocationRelativeTo(null);
-
-            String[] productos = {"Crema de peinar", "Shampoo", "Acondicionador", "Cera capilar", "Gel"};
-            JList<String> lista = new JList<>(productos);
-            lista.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-
-            JButton agregarBtn = new JButton("Agregar al historial");
-            agregarBtn.addActionListener(e -> {
-                String seleccion = lista.getSelectedValue();
-                if (seleccion != null) {
-                    historial.addElement("Producto: " + seleccion);
-                    JOptionPane.showMessageDialog(this, seleccion + " agregado al historial");
-                } else {
-                    JOptionPane.showMessageDialog(this, "Selecciona un producto primero");
-                }
-            });
-
-            add(new JScrollPane(lista), BorderLayout.CENTER);
-            add(agregarBtn, BorderLayout.SOUTH);
-            setVisible(true);
-        }
-    }
-
-
-    static class HistorialVentana extends JFrame {
-        public HistorialVentana() {
-            setTitle("Historial de Selecciones");
-            setSize(360, 300);
-            setLocationRelativeTo(null);
-
-            JList<String> lista = new JList<>(historial); // se actualiza en tiempo real
-            add(new JScrollPane(lista), BorderLayout.CENTER);
-
-            JButton limpiarBtn = new JButton("Limpiar historial");
-            limpiarBtn.addActionListener(e -> {
-                int r = JOptionPane.showConfirmDialog(this, "¿Limpiar todo el historial?", "Confirmar", JOptionPane.YES_NO_OPTION);
-                if (r == JOptionPane.YES_OPTION) historial.clear();
-            });
-
-            JPanel south = new JPanel();
-            south.add(limpiarBtn);
-            add(south, BorderLayout.SOUTH);
-
-            setVisible(true);
-        }
+        SwingUtilities.invokeLater(BarberiaExotica::new);
     }
 }
